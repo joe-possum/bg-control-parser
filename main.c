@@ -1,4 +1,6 @@
 #include <stdio.h>
+#include <stdlib.h>
+#include <stdint.h>
 #include "parser.tab.h"
 
 int yyerror(const char *msg) {
