@@ -8,6 +8,8 @@ int yyerror(const char *msg) {
 
 int main (int argc, char *const *argv) {
   while(1) {
-    printf("yylex returns: %d\n", yylex());
+    int rc = yyparse();
+    printf("yyparse returns: %d\n", rc);
+    if(!rc) return 0;
   }
 }

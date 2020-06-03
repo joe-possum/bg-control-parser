@@ -1,8 +1,11 @@
-a.exe : lex.yy.c y.tab.c main.c
-	gcc -Wall lex.yy.c y.tab.c main.c
+parser.exe : lex.yy.c parser.tab.c main.c
+	gcc -Wall lex.yy.c parser.tab.c main.c -o $@
 
-lex.yy.c : scanner.ll y.tab.h
+lex.yy.c : scanner.l parser.tab.h
 	flex $^
 
-y.tab.c y.tab.h : parser.y
-	bison -yt --defines $^
+parser.tab.c parser.tab.h : parser.y
+	bison --defines -g -t $^
+
+clean :
+	rm -f lex.yy.c parser.tab.[ch] parser.exe
