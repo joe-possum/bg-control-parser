@@ -1,5 +1,5 @@
 #include <stdio.h>
-#include "y.tab.h"
+#include "parser.tab.h"
 
 int yyerror(const char *msg) {
   fprintf(stderr,"Wrong! (%s)\n",msg);

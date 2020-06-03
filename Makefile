@@ -1,4 +1,4 @@
-parser.exe : lex.yy.c parser.tab.c main.c
+parser.exe : lex.yy.c parser.tab.[ch] main.c 
 	gcc -Wall lex.yy.c parser.tab.c main.c -o $@
 
 lex.yy.c : scanner.l parser.tab.h
