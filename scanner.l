@@ -7,10 +7,11 @@
 "get"	{ return GET; }
 "set"   { return SET; }
 "stay-connected" { return STAY_CONNECTED; }
-"em1"   { return EM1; }
-"em2"   { return EM2; }
-"em4s"  { return EM4S; }
-"em4h"  { return EM4H; }
+"stay-em1"   { return STAY_EM1; }
+"stay-em2"   { return STAY_EM2; }
+"stay-em3"   { return STAY_EM3; }
+"stay-em4s"  { return STAY_EM4S; }
+"stay-em4h"  { return STAY_EM4H; }
 "ota"   { return OTA; }
 "dcdc"  { return DCDC; }
 "emu"   { return EMU; }

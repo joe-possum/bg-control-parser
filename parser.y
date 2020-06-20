@@ -5,86 +5,11 @@
   #include <stdlib.h>
   #include <stdint.h>
   #include <math.h>
+  #include "parser.h"
+  
   int yylex(void);
   void yyerror(const char *);
-  enum value_types { VALUE_TYPE_INTEGER, VALUE_TYPE_FLOAT, VALUE_TYPE_ENABLE, VALUE_TYPE_PA_INPUT };
-  struct parameter {
-    uint8_t set;
-    int32_t value;
-    int32_t min, max;
-    double conversion;
-    enum value_types type;
-    const char *help, *name;
-  };
-  struct {
-    struct {
-      uint8_t dcdc, emu, gpio;
-    } get;
-    struct parameter pa_mode, pa_input, tx_power, em2_debug, connection_interval, adv_interval, adv_length;
-    uint8_t abort;
-  } commands = {
-		.abort = 0,
-		.pa_mode = {
-			    .set = 0,
-			    .min = 0,
-			    .max = 1,
-			    .type = VALUE_TYPE_INTEGER,
-			    .name = "pa-mode",
-			    .help = "set pa-mode <pa>: 0 uses highest power PA, 1 next highest, etc.",
-			    },
-		.pa_input = {
-			     .set = 0,
-			     .min = 0,
-			     .max = 1,
-			     .type = VALUE_TYPE_PA_INPUT,
-			     .name = "pa-input",
-			     .help = "set pa-input <input>: 0, 1, VBAT or DCDC",
-			     },
-		.tx_power = {
-			     .set = 0,
-			     .min = -32768,
-			     .max = 32767,
-			     .type = VALUE_TYPE_FLOAT,
-			     .conversion = 10.0,
-			     .name = "tx-power",
-			     .help  = "set tx-power <dBm>: requested TX power in dBm, useful range -27 to 20",
-			     },
-		.em2_debug = {
-			      .set = 0,
-			      .min = 0,
-			      .max = 1,
-			      .type = VALUE_TYPE_ENABLE,
-			      .name = "em2-debug",
-			      .help = "set em2-debug <enable>: 0, 1, disable or enable",
-			      },
-		.connection_interval = {
-					.set = 0,
-					.min = 6,
-					.max = 3200,
-					.type = VALUE_TYPE_FLOAT,
-					.conversion = 0.8,
-					.name = "connection-interval",
-					.help = "set connection-interval <ms>: 7.5 to 4000",
-					},
-		.adv_interval = {
-				 .set = 0,
-				 .min = 0x20,
-				 .max = 0xffff,
-				 .type = VALUE_TYPE_FLOAT,
-				 .conversion = 1.6,
-				 .name = "adv-interval",
-				 .help = "set adv-interval <ms>: 20 to 30000",
-				 },
-		.adv_length = {
-			       .set = 0,
-			       .min = 0,
-			       .max = 31,
-			       .type = VALUE_TYPE_INTEGER,
-			       .name = "adv-length",
-			       .help = "set adv-length <payload-size>: 0 to 31",
-			       },
-  };
-  
+
   struct value {
     enum value_types type;
     double fp;
@@ -99,13 +24,11 @@
       switch(value->type) {
       case VALUE_TYPE_INTEGER:
 	  parameter->value = value->integer;
-	  parameter->set = 1;
 	  break;
       case VALUE_TYPE_FLOAT:
 	integer = value->fp;
 	if(integer == value->fp) {
 	  parameter->value = integer;
-	  parameter->set = 1;
 	  break;
 	}
       default:
@@ -117,11 +40,9 @@
       switch(value->type) {
       case VALUE_TYPE_INTEGER:
 	parameter->value = round(parameter->conversion * value->integer);
-	parameter->set = 1;
 	break;
       case VALUE_TYPE_FLOAT:
 	parameter->value = round(parameter->conversion * value->fp);
-	parameter->set = 1;
 	break;
       default:
 	fprintf(stderr,"%s value should be floating-point\n",parameter->name);
@@ -158,6 +79,7 @@
       fprintf(stderr,"%s value to low\n",parameter->name);
       return 1;
     }
+    parameter->set = 1;
     return 0;
   }
 
@@ -184,7 +106,7 @@
   uint8_t *get;
   struct parameter *set;
 }
-%token GET SET HELP STAY_CONNECTED EM1 EM2 EM4H EM4S OTA UNKNOWN
+%token GET SET HELP STAY_CONNECTED STAY_EM1 STAY_EM2 STAY_EM3 STAY_EM4H STAY_EM4S OTA UNKNOWN
 %token DCDC EMU GPIO PA_INPUT_VBAT PA_INPUT_DCDC
 %token PA_MODE PA_INPUT TX_POWER EM2_DEBUG CONNECTION_INTERVAL ADV_INTERVAL ADV_LENGTH
 %token <integer> INT
@@ -205,11 +127,20 @@ line :
   ;
 
 command :
-GET peripheral { if($2) {*$2 = 1;}  }
+OTA { commands.ota = 1; }
+| GET peripheral { if($2) {*$2 = 1;}  }
 | SET parameter value { if(set_parameter($2,$3)) commands.abort = 1; free($3); }
 | SET parameter help {printf("%s\n",$2->help); }
-| SET help { printf("Parameters: pa-mode pa-input tx-power\n"); }
-| help { printf("get <peripheral>\nset <parameter> <value>\nSpecify 'help' as peripheral or parameter to get list of supported names\n"); }
+| SET help { printf("set <parameters> <value>:\n"
+		    "parameters:\n"
+		    "\tpa-mode pa-input tx-power em2-debug\n"
+		    "\tconnection-interval adv-interval adv-length\n"
+		    "\tstay-connected em1 em2 em4h em4s\n"); }
+| help { printf("Commands:\n"
+		"\tota\n"
+		"\tget <peripheral>\n"
+		"\tset <parameter> <value>\n"
+		"  Specify 'help' as peripheral or parameter to get list of supported names\n"); }
 ;
 
 peripheral :
@@ -227,6 +158,12 @@ PA_MODE { $$ = &commands.pa_mode; }
 | CONNECTION_INTERVAL { $$ = &commands.connection_interval; }
 | ADV_INTERVAL { $$ = &commands.adv_interval; }
 | ADV_LENGTH { $$ = &commands.adv_length; }
+| STAY_CONNECTED { $$ = &commands.stay_connected; }
+| STAY_EM1 { $$ = &commands.stay_em1; }
+| STAY_EM2 { $$ = &commands.stay_em2; }
+| STAY_EM3 { $$ = &commands.stay_em3; }
+| STAY_EM4H { $$ = &commands.stay_em4h; }
+| STAY_EM4S { $$ = &commands.stay_em4s; }
 ;
 
 value :

@@ -1,5 +1,5 @@
-parser.exe : lex.yy.c parser.tab.c parser.tab.h main.c 
-	gcc -Wall lex.yy.c parser.tab.c main.c -o $@
+parser.exe : lex.yy.c parser.tab.c parser.tab.h main.c parser-data.c
+	gcc -Wall lex.yy.c parser.tab.c parser-data.c main.c -o $@ -lm
 
 lex.yy.c : scanner.l parser.tab.h
 	flex --header-file=scanner.h $^

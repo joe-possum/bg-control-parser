@@ -4,6 +4,7 @@
 #include "parser.tab.h"
 #include <string.h>
 #include "scanner.h"
+#include "parser.h"
 
 YY_BUFFER_STATE yy_scan_string ( const char *yy_str  );
 
@@ -27,9 +28,15 @@ int main (int argc, char *const *argv) {
   }
   printf("buf: '%s'\n",buf);
   yy_scan_string(buf);
-  while(1) {
-    int rc = yyparse();
-    printf("yyparse returns: %d\n", rc);
-    if(!rc) return 0;
-  }
+  int rc = yyparse();
+  printf("yyparse returns: %d\n", rc);
+  if(rc) return 1;
+#define S(X) if(commands.X.set) printf("set " #X " to %d\n",commands.X.value)
+  S(pa_mode);
+  S(pa_input);
+  S(tx_power);
+  S(em2_debug);
+  S(connection_interval);
+  S(adv_interval);
+  S(adv_length);
 }
