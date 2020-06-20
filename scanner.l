@@ -17,8 +17,13 @@
 "gpio"  { return GPIO; }
 "pa-mode" { return PA_MODE; }
 "pa-input" { return PA_INPUT; }
+"VBAT" { return  PA_INPUT_VBAT; }
+"DCDC" { return PA_INPUT_DCDC; }
 "tx-power" { return TX_POWER; }
 "em2-debug" { return EM2_DEBUG; }
+"connection-interval" { return CONNECTION_INTERVAL; }
+"adv-interval" { return ADV_INTERVAL; }
+"adv-length" { return ADV_LENGTH; }
 "enable" { return ENABLE; }
 "disable" { return DISABLE; }
 [+\-]?(([0-9]+\.[0-9]*)|([0-9]*\.[0-9]+)) { sscanf(yytext,"%lf",&yylval.fp); printf("float: %s\n",yytext); return FLOAT; }
