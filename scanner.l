@@ -3,9 +3,11 @@
 %}
 
 %%
+"help"  { return HELP; }
 "get"	{ return GET; }
 "set"   { return SET; }
 "stay-connected" { return STAY_CONNECTED; }
+"em1"   { return EM1; }
 "em2"   { return EM2; }
 "em4s"  { return EM4S; }
 "em4h"  { return EM4H; }
@@ -15,6 +17,7 @@
 "gpio"  { return GPIO; }
 "pa-mode" { return PA_MODE; }
 "pa-input" { return PA_INPUT; }
+"tx-power" { return TX_POWER; }
 "em2-debug" { return EM2_DEBUG; }
 "enable" { return ENABLE; }
 "disable" { return DISABLE; }
@@ -27,4 +30,8 @@
 
 %%
 
-int yywrap(void) { return 1; }
+int yywrap(void) {
+(void)input;
+(void)yyunput;
+return 1; 
+}

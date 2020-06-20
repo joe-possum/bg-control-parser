@@ -15,6 +15,8 @@
   struct {
     uint32_t pa_mode, pa_input, tx_power;
   } values;
+
+  int run = 1;
 %}
 
 %union {
@@ -26,7 +28,7 @@
     uint32_t *value;
   } set;
 }
-%token GET SET STAY_CONNECTED EM2 EM4H EM4S OTA UNKNOWN
+%token GET SET HELP STAY_CONNECTED EM1 EM2 EM4H EM4S OTA UNKNOWN
 %token DCDC EMU GPIO
 %token PA_MODE PA_INPUT TX_POWER EM2_DEBUG
 %token <integer> INT
@@ -46,15 +48,17 @@ line :
   ;
 
 command :
-GET peripheral { *$2 = 1; }
-| SET EM2_DEBUG binary_value { if($3) {} fprintf(stderr,""); exit(1); }
+GET peripheral { if($2) {*$2 = 1;} else run = 0; }
+| SET EM2_DEBUG binary_value { if($3) {} fprintf(stderr,"error"); exit(1); }
 | SET parameter value { printf("got a SET\n"); }
+| SET HELP { printf("Parameters: pa-mode pa-input tx-power\n"); }
 ;
 
 peripheral :
 DCDC { $$ = &get.dcdc; }
 | EMU { $$ = &get.emu; }
 | GPIO { $$ = &get.gpio; }
+| HELP { printf("Peripherals: DCDC EMU GPIO\n"); $$ = NULL; }
 ;
 
 parameter :
@@ -64,7 +68,7 @@ PA_MODE { $$.flag = &set.pa_mode; $$.value = &values.pa_mode; }
 ;
 
 binary_value :
-  INT { if (($1 < 0)||($1 > 1)) { fprintf(stderr,"illegal value\n",$1); $$ = $1; }}
+  INT { if (($1 < 0)||($1 > 1)) { fprintf(stderr,"illegal value %d\n",$1); $$ = $1; }}
 | ENABLE { $$ = 1; }
 | DISABLE { $$ = 0; }
   ;
