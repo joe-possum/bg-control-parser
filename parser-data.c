@@ -1,8 +1,10 @@
 #include "parser.h"
+#include <stddef.h>
 
 struct commands commands = {
 	    .abort = 0,
 	    .ota = 0,
+	    .gpio = NULL,
 	    .pa_mode = {
 			.set = 0,
 			.min = 0,
@@ -62,11 +64,20 @@ struct commands commands = {
 			   .name = "adv-length",
 			   .help = "set adv-length <payload-size>: 0 to 31",
 			   },
+	    .sleep_clock_accuracy = {
+				     .set = 0,
+				     .min = 0,
+				     .max = 500,
+				     .type = VALUE_TYPE_INTEGER,
+				     .name = "sleep-clock-accuracy",
+				     .help = "set sleep-clock-accuracy <ppm>",
+				     },
 	    .stay_connected = {
 			       .set = 0,
 			       .min = 623,
 			       .max = 0x7fffffff,
 			       .type = VALUE_TYPE_FLOAT,
+			       .conversion = 32768,
 			       .name = "stay-connected",
 			       .help = "set stay-connected <seconds>: duration to remain connected",
 			       },
@@ -75,6 +86,7 @@ struct commands commands = {
 			       .min = 623,
 			       .max = 0x7fffffff,
 			       .type = VALUE_TYPE_FLOAT,
+			       .conversion = 32768,
 			       .name = "stay-em1",
 			       .help = "set stay-em1 <seconds>: duration to remain in EM1 before advertising",
 			       },
@@ -83,6 +95,7 @@ struct commands commands = {
 			       .min = 623,
 			       .max = 0x7fffffff,
 			       .type = VALUE_TYPE_FLOAT,
+			       .conversion = 32768,
 			       .name = "stay-em2",
 			       .help = "set stay-em2 <seconds>: duration to remain in EM2 before advertising",
 			       },
@@ -91,6 +104,7 @@ struct commands commands = {
 			       .min = 623,
 			       .max = 0x7fffffff,
 			       .type = VALUE_TYPE_FLOAT,
+			       .conversion = 32768,
 			       .name = "stay-em3",
 			       .help = "set stay-em3 <seconds>: duration to remain in EM3 before advertising",
 			       },
@@ -99,6 +113,7 @@ struct commands commands = {
 			       .min = 623,
 			       .max = 0x7fffffff,
 			       .type = VALUE_TYPE_FLOAT,
+			       .conversion = 32768,
 			       .name = "stay-em4",
 			       .help = "set stay-em4h <seconds>: duration to remain in EM4H before advertising",
 			       },
@@ -107,8 +122,25 @@ struct commands commands = {
 			       .min = 623,
 			       .max = 0x7fffffff,
 			       .type = VALUE_TYPE_FLOAT,
+			       .conversion = 32768,
 			       .name = "stay-em4s",
 			       .help = "set stay-em4s <seconds>: duration to remain in EM4S before advertising",
 			       },
+	    .average_rssi = {
+			     .set = 0,
+			     .min = 623,
+			     .max = 0x7fffffff,
+			     .type = VALUE_TYPE_FLOAT,
+			     .conversion = 32768,
+			     .name = "average-rssi",
+			     .help = "average-rssi <seconds>: duration to average RSSI over",
+			     },
+	    .rssi_channel = {
+			     .set = 0,
+			     .min = 0,
+			     .max = 2,
+			     .type = VALUE_TYPE_INTEGER,
+			     .name = "rssi-channel",
+			     .help = "set rssi-channel <index>: channel to measure average RSSI.  0-2",
+			     },
 };
-  

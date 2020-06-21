@@ -9,13 +9,19 @@ struct parameter {
   enum value_types type;
   const char *help, *name;
 };
+struct gpio_element {
+  int port, pin, mode, value;
+  struct gpio_element *next;
+};
 struct commands {
   struct {
     uint8_t dcdc, emu, gpio;
   } get;
-  struct parameter pa_mode, pa_input, tx_power, em2_debug, connection_interval, adv_interval, adv_length,
-    stay_connected, stay_em1, stay_em2, stay_em3, stay_em4h, stay_em4s;
+  struct parameter pa_mode, pa_input, tx_power, em2_debug, sleep_clock_accuracy,
+    connection_interval, adv_interval, adv_length,
+    stay_connected, stay_em1, stay_em2, stay_em3, stay_em4h, stay_em4s, average_rssi, rssi_channel;
   uint8_t abort, ota;
+  struct gpio_element *gpio;
 };
 
 extern struct commands commands;
