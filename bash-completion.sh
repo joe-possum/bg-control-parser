@@ -2,7 +2,7 @@
 
 function parser_completion
 {
-    COMMANDS="ota average-rssi get set gpio-disabled gpio-pushpull"
+    COMMANDS="ota average-rssi get set measure gpio-disabled gpio-pushpull"
     PARAMETERS="pa-mode pa-input tx-power em2-debug sleep-clock-accuracy connection-interval adv-interval adv-length"
     COUNT=${#COMP_WORDS[@]}
 #    echo COUNT=${COUNT}
