@@ -23,9 +23,9 @@
   struct parameter *set;
 }
 %token GET SET HELP
-%token STAY_CONNECTED STAY_EM1 STAY_EM2 STAY_EM3 STAY_EM4H STAY_EM4S
+%token CONNECTED EM1 EM2 EM3 EM4H EM4S
 %token AVERAGE_RSSI RSSI_CHANNEL
-%token OTA UNKNOWN
+%token OTA MEASURE MEASUREMENT_MODE UNKNOWN
 %token DCDC EMU GPIO PA_INPUT_VBAT PA_INPUT_DCDC
 %token PA_MODE PA_INPUT TX_POWER EM2_DEBUG CONNECTION_INTERVAL ADV_INTERVAL ADV_LENGTH SLEEP_CLOCK_ACCURACY
 %token COMMA ASSIGN
@@ -56,6 +56,14 @@ OTA { commands.ota = 1; }
 | SET parameter value { if(set_parameter($2,$3)) commands.abort = 1; free($3); }
 | SET parameter help {printf("%s\n",$2->help); }
 | AVERAGE_RSSI value { if(set_parameter(&commands.average_rssi,$2)) commands.abort = 1; free($2); }
+| MEASURE value value {
+  if(set_parameter(&commands.measurement_mode,$2)) commands.abort = 1; free($2);
+  if(set_parameter(&commands.measurement_duration,$3)) commands.abort = 1; free($3);
+}
+| MEASURE help { printf("measure <mode> <duration>:\n"
+			"\tmode: connected em1 em2 em3 em4h em4s\n"
+			"\tduration: time in seconds to remain in specified mode before\n"
+			"\t\tadvertising as bg-control peripheral\n"); }
 | SET help { printf("set <parameters> <value>:\n"
 		    "parameters:\n"
 		    "\tpa-mode pa-input tx-power em2-debug sleep-clock-accuracy\n"
@@ -64,6 +72,7 @@ OTA { commands.ota = 1; }
 | help { printf("Commands:\n"
 		"\tota\n"
 		"\taverage-rssi <seconds>\n"
+		"\tmeasure <mode> <seconds>\n"
 		"\tget <peripheral>\n"
 		"\tset <parameter> <value>\n"
 		"  Specify 'help' as peripheral or parameter to get list of supported names\n"); }
@@ -87,12 +96,6 @@ PA_MODE { $$ = &commands.pa_mode; }
 | ADV_INTERVAL { $$ = &commands.adv_interval; }
 | ADV_LENGTH { $$ = &commands.adv_length; }
 | SLEEP_CLOCK_ACCURACY { $$ = &commands.sleep_clock_accuracy; }
-| STAY_CONNECTED { $$ = &commands.stay_connected; }
-| STAY_EM1 { $$ = &commands.stay_em1; }
-| STAY_EM2 { $$ = &commands.stay_em2; }
-| STAY_EM3 { $$ = &commands.stay_em3; }
-| STAY_EM4H { $$ = &commands.stay_em4h; }
-| STAY_EM4S { $$ = &commands.stay_em4s; }
 | RSSI_CHANNEL { $$ = &commands.rssi_channel; }
 ;
 
@@ -103,6 +106,12 @@ INT { $$ = create_integer($1); }
 | ENABLE { $$ = create_integer(1); $$->type = VALUE_TYPE_ENABLE; }
 | PA_INPUT_VBAT { $$ = create_integer(0); $$->type = VALUE_TYPE_PA_INPUT; }
 | PA_INPUT_DCDC { $$ = create_integer(1); $$->type = VALUE_TYPE_PA_INPUT; }
+| CONNECTED { $$ = create_integer(CONNECTED); $$->type = VALUE_TYPE_MEASUREMENT_MODE; }
+| EM1 { $$ = create_integer(EM1); $$->type = VALUE_TYPE_MEASUREMENT_MODE; }
+| EM2 { $$ = create_integer(EM2); $$->type = VALUE_TYPE_MEASUREMENT_MODE; }
+| EM3 { $$ = create_integer(EM3); $$->type = VALUE_TYPE_MEASUREMENT_MODE; }
+| EM4H { $$ = create_integer(EM4H); $$->type = VALUE_TYPE_MEASUREMENT_MODE; }
+| EM4S { $$ = create_integer(EM4S); $$->type = VALUE_TYPE_MEASUREMENT_MODE; }
 ;
 
 gpio_pin_list :

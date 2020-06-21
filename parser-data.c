@@ -74,60 +74,6 @@ struct commands commands = {
 				     .name = "sleep-clock-accuracy",
 				     .help = "set sleep-clock-accuracy <ppm>",
 				     },
-	    .stay_connected = {
-			       .set = 0,
-			       .min = 623,
-			       .max = 0x7fffffff,
-			       .type = VALUE_TYPE_FLOAT,
-			       .conversion = 32768,
-			       .name = "stay-connected",
-			       .help = "set stay-connected <seconds>: duration to remain connected",
-			       },
-	    .stay_em1 = {
-			       .set = 0,
-			       .min = 623,
-			       .max = 0x7fffffff,
-			       .type = VALUE_TYPE_FLOAT,
-			       .conversion = 32768,
-			       .name = "stay-em1",
-			       .help = "set stay-em1 <seconds>: duration to remain in EM1 before advertising",
-			       },
-	    .stay_em2 = {
-			       .set = 0,
-			       .min = 623,
-			       .max = 0x7fffffff,
-			       .type = VALUE_TYPE_FLOAT,
-			       .conversion = 32768,
-			       .name = "stay-em2",
-			       .help = "set stay-em2 <seconds>: duration to remain in EM2 before advertising",
-			       },
-	    .stay_em3 = {
-			       .set = 0,
-			       .min = 623,
-			       .max = 0x7fffffff,
-			       .type = VALUE_TYPE_FLOAT,
-			       .conversion = 32768,
-			       .name = "stay-em3",
-			       .help = "set stay-em3 <seconds>: duration to remain in EM3 before advertising",
-			       },
-	    .stay_em4h = {
-			       .set = 0,
-			       .min = 623,
-			       .max = 0x7fffffff,
-			       .type = VALUE_TYPE_FLOAT,
-			       .conversion = 32768,
-			       .name = "stay-em4",
-			       .help = "set stay-em4h <seconds>: duration to remain in EM4H before advertising",
-			       },
-	    .stay_em4s = {
-			       .set = 0,
-			       .min = 623,
-			       .max = 0x7fffffff,
-			       .type = VALUE_TYPE_FLOAT,
-			       .conversion = 32768,
-			       .name = "stay-em4s",
-			       .help = "set stay-em4s <seconds>: duration to remain in EM4S before advertising",
-			       },
 	    .average_rssi = {
 			     .set = 0,
 			     .min = 623,
@@ -145,6 +91,24 @@ struct commands commands = {
 			     .name = "rssi-channel",
 			     .help = "set rssi-channel <index>: channel to measure average RSSI.  0-2",
 			     },
+	    .measurement_duration = {
+				     .set = 0,
+				     .min = 623,
+				     .max = 0x7fffffff,
+				     .type = VALUE_TYPE_FLOAT,
+				     .conversion = 32768,
+				     .name = "measurement duration",
+				     .help = "",
+				     },
+	    .measurement_mode = {
+				 .set = 0,
+				 .min = 0,
+				 .max = 0x7fffffff,
+				 .type = VALUE_TYPE_MEASUREMENT_MODE,
+				 .conversion = 32768,
+				 .name = "measurement mode",
+				 .help = "",
+				 },
 };
 
 int set_parameter(struct parameter *parameter, struct value *value) {
@@ -198,6 +162,15 @@ int set_parameter(struct parameter *parameter, struct value *value) {
       break;
     default:
       fprintf(stderr,"%s value should be one of: 0, 1, VBAT, DCDC\n",parameter->name);
+      return 1;
+    }
+  case VALUE_TYPE_MEASUREMENT_MODE:
+    switch(value->type) {
+    case VALUE_TYPE_MEASUREMENT_MODE:
+      parameter->value = value->integer;
+      break;
+    default:
+      fprintf(stderr,"%s value should be one of: connected, em1, em3, em3, em4h, em4s\n",parameter->name);
       return 1;
     }
   }
