@@ -8,6 +8,8 @@
 
 YY_BUFFER_STATE yy_scan_string ( const char *yy_str  );
 
+int yyparse(void);
+
 int yyerror(const char *msg) {
   fprintf(stderr,"Wrong! (%s)\n",msg);
   return 0;
@@ -62,6 +64,6 @@ int main (int argc, char *const *argv) {
   S(stay_em4h);
   S(stay_em4s);
   for(struct gpio_element *ptr = commands.gpio; ptr; ptr = ptr->next) {
-    printf("p%c%d=%d\n",'a'+ptr->port,ptr->pin,ptr->value);
+    printf("p%c%d: set mode: %d, set value: %d\n",'a'+ptr->port,ptr->pin,ptr->mode,1&ptr->value);
   }
 }

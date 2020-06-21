@@ -2,105 +2,16 @@
 
 %{
   #include <stdio.h>
-  #include <stdlib.h>
   #include <stdint.h>
-  #include <math.h>
   #include "parser.h"
   
   int yylex(void);
   void yyerror(const char *);
 
-  struct value {
-    enum value_types type;
-    double fp;
-    int integer;
-  };
-
-  struct gpio_pin {
-    uint8_t port, pin;
-  };
-  
-  int set_parameter(struct parameter *parameter, struct value *value) {
-    int integer;
-    //printf("Setting %s to (%d / %lf) ... ",parameter->name,value->integer,value->fp);
-    switch(parameter->type) {
-    case VALUE_TYPE_INTEGER:
-      switch(value->type) {
-      case VALUE_TYPE_INTEGER:
-	  parameter->value = value->integer;
-	  break;
-      case VALUE_TYPE_FLOAT:
-	integer = value->fp;
-	if(integer == value->fp) {
-	  parameter->value = integer;
-	  break;
-	}
-      default:
-	fprintf(stderr,"%s value should be integer\n",parameter->name);
-	return 1;
-      }
-      break;
-    case VALUE_TYPE_FLOAT:
-      switch(value->type) {
-      case VALUE_TYPE_INTEGER:
-	parameter->value = round(parameter->conversion * value->integer);
-	break;
-      case VALUE_TYPE_FLOAT:
-	parameter->value = round(parameter->conversion * value->fp);
-	break;
-      default:
-	fprintf(stderr,"%s value should be floating-point\n",parameter->name);
-	return 1;
-      }
-      break;
-    case VALUE_TYPE_ENABLE:
-      switch(value->type) {
-      case VALUE_TYPE_INTEGER:
-      case VALUE_TYPE_ENABLE:
-	parameter->value = value->integer;
-	break;
-      default:
-	fprintf(stderr,"%s value should be one of: 0, 1, enable, disable\n",parameter->name);
-	return 1;
-      }
-    case VALUE_TYPE_PA_INPUT:
-      switch(value->type) {
-      case VALUE_TYPE_INTEGER:
-      case VALUE_TYPE_PA_INPUT:
-	parameter->value = value->integer;
-	break;
-      default:
-	fprintf(stderr,"%s value should be one of: 0, 1, VBAT, DCDC\n",parameter->name);
-	return 1;
-      }
-    }
-    //printf("= 0x%x\n",parameter->value);
-    if(parameter->value > parameter->max) {
-      fprintf(stderr,"%s value too high\n",parameter->name);
-      return 1;
-    }
-    if(parameter->value < parameter->min) {
-      fprintf(stderr,"%s value too low\n",parameter->name);
-      return 1;
-    }
-    parameter->set = 1;
-    return 0;
-  }
-
-  struct value *create_integer(int value) {
-    struct value *rc = malloc(sizeof(struct value));
-    rc->type = VALUE_TYPE_INTEGER;
-    rc->integer = value;
-    return rc;
-  }
-
-  struct value *create_float(double value) {
-    struct value *rc = malloc(sizeof(struct value));
-    rc->type = VALUE_TYPE_FLOAT;
-    rc->fp = value;
-    return rc;
-  }
-
+  int set_parameter(struct parameter *parameter, struct value *value);
+  struct value *create_integer(int value);
+  struct value *create_float(double value);
+  void set_mode_and_attach(struct gpio_element *list, uint8_t mode);
 %}
 
 %union {
@@ -156,17 +67,8 @@ OTA { commands.ota = 1; }
 		"\tget <peripheral>\n"
 		"\tset <parameter> <value>\n"
 		"  Specify 'help' as peripheral or parameter to get list of supported names\n"); }
-| GPIO_DISABLED gpio_pin_list {
-  if(commands.gpio) {
-    for(struct gpio_element *ptr = commands.gpio; ptr; ptr = ptr->next) {
-      if(ptr->next) continue;
-      ptr->next = $2;
-      break;
-    }
-  } else {
-    commands.gpio = $2;
-  }
-}
+| GPIO_DISABLED gpio_pin_list { set_mode_and_attach($2,0); }
+| GPIO_PUSHPULL gpio_pin_list { set_mode_and_attach($2,4); }
 ;
 
 peripheral :

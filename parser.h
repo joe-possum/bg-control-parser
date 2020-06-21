@@ -1,6 +1,13 @@
 #include <stdint.h>
 
 enum value_types { VALUE_TYPE_INTEGER, VALUE_TYPE_FLOAT, VALUE_TYPE_ENABLE, VALUE_TYPE_PA_INPUT };
+
+  struct value {
+    enum value_types type;
+    double fp;
+    int integer;
+  };
+
 struct parameter {
   uint8_t set;
   int32_t value;
@@ -9,10 +16,12 @@ struct parameter {
   enum value_types type;
   const char *help, *name;
 };
+
 struct gpio_element {
   int port, pin, mode, value;
   struct gpio_element *next;
 };
+
 struct commands {
   struct {
     uint8_t dcdc, emu, gpio;
